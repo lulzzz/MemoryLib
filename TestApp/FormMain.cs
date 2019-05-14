@@ -21,20 +21,22 @@ namespace TestApp {
             return array == null ? string.Empty : string.Join(separator, array.Select(v => $"{v:X2}"));
         }
 
+        private static int m_Counter;
         private void ButtonTest1_Click(object sender, EventArgs e) {
-            Logging.Clear();
+            //Logging.Clear();
+            Logging.Log($"Counter={m_Counter++}");
             var proc = Process.GetCurrentProcess();
             //proc = Process.GetProcessesByName("sekiro").FirstOrDefault();
             //proc = Process.GetProcessesByName("ffxiv_dx11").FirstOrDefault();
             //proc = Process.GetProcessesByName("notepad++").FirstOrDefault();
             //proc = Process.GetProcessesByName("ReClass.NET").FirstOrDefault();
+            //proc = Process.GetProcessesByName("mspaint").FirstOrDefault();
             var swTotal = Stopwatch.StartNew();
-            
+
             using (var mem = new RemoteProcess(proc)) {
                 var win = mem.Windows.MainWindow;
-                var m = win.Mouse;
-                m.ClickLeft(11, 20);
             }
+
             swTotal.Stop();
             Logging.Log($"TotalTime: {swTotal.Elapsed.TotalMilliseconds:N1} ms ({swTotal.Elapsed.Ticks:N1} ticks)");
         }

@@ -9,7 +9,9 @@ namespace MemLib.Windows.Mouse {
         public bool IsRightDown { get; private set; }
 
         public MessageMouse(RemoteWindow window) : base(window) {
-            Cursor = NativeMethods.GetCursorPos(out var pos) ? pos : new Point();
+            NativeMethods.GetCursorPos(out var pos);
+            NativeMethods.ScreenToClient(window.Handle, ref pos);
+            Cursor = pos;
         }
 
         private static uint MakeLParam(int loWord, int hiWord) {
@@ -29,37 +31,37 @@ namespace MemLib.Windows.Mouse {
         #region Overrides of BaseMouse
 
         public override void MoveTo(int x, int y) {
-            Window.NPostMessage(WindowsMessages.MouseMove, GetKeysDown(), MakeLParam(x, y));
+            Window.PostMessage(WindowsMessages.MouseMove, GetKeysDown(), MakeLParam(x, y));
             Cursor = new Point {X = x, Y = y};
         }
 
         public override void PressLeft() {
-            Window.NPostMessage(WindowsMessages.LButtonDown, 1, GetPosParam());
+            Window.PostMessage(WindowsMessages.LButtonDown, (uint)Keys.LButton, GetPosParam());
             IsLeftDown = true;
         }
 
         public override void PressMiddle() {
-            Window.NPostMessage(WindowsMessages.MButtonDown, 1, GetPosParam());
+            Window.PostMessage(WindowsMessages.MButtonDown, (uint)Keys.MButton, GetPosParam());
             IsMiddleDown = true;
         }
 
         public override void PressRight() {
-            Window.NPostMessage(WindowsMessages.RButtonDown, 1, GetPosParam());
+            Window.PostMessage(WindowsMessages.RButtonDown, (uint)Keys.RButton, GetPosParam());
             IsRightDown = true;
         }
 
         public override void ReleaseLeft() {
-            Window.NPostMessage(WindowsMessages.LButtonUp, 0, GetPosParam());
+            Window.PostMessage(WindowsMessages.LButtonUp, (uint)Keys.LButton, GetPosParam());
             IsLeftDown = false;
         }
 
         public override void ReleaseMiddle() {
-            Window.NPostMessage(WindowsMessages.MButtonUp, 0, GetPosParam());
+            Window.PostMessage(WindowsMessages.MButtonUp, (uint)Keys.MButton, GetPosParam());
             IsMiddleDown = false;
         }
 
         public override void ReleaseRight() {
-            Window.NPostMessage(WindowsMessages.RButtonUp, 0, GetPosParam());
+            Window.PostMessage(WindowsMessages.RButtonUp, (uint)Keys.RButton, GetPosParam());
             IsRightDown = false;
         }
 

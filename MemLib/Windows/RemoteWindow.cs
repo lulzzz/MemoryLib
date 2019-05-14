@@ -17,8 +17,10 @@ namespace MemLib.Windows {
         }
 
         public IntPtr Handle { get; }
-        public SendInputMouse Mouse { get; }
-        public MessageKeyboard Keyboard { get; }
+        private MessageMouse m_Mouse;
+        public MessageMouse Mouse => m_Mouse ?? (m_Mouse = new MessageMouse(this));
+        private MessageKeyboard m_Keyboard;
+        public MessageKeyboard Keyboard => m_Keyboard ?? (m_Keyboard = new MessageKeyboard(this));
         public bool IsMainWindow => m_Process.Windows.MainWindow == this;
         public bool IsActivated => NativeMethods.GetForegroundWindow() == Handle;
         public string ClassName => WindowHelper.GetClassName(Handle);
@@ -70,8 +72,6 @@ namespace MemLib.Windows {
         internal RemoteWindow(RemoteProcess process, IntPtr handle) {
             m_Process = process;
             Handle = handle;
-            Mouse = new SendInputMouse(this);
-            Keyboard = new MessageKeyboard(this);
         }
 
         public bool Activate() {
@@ -81,6 +81,8 @@ namespace MemLib.Windows {
         public bool Close() {
             return PostMessage(WindowsMessages.Close, UIntPtr.Zero, UIntPtr.Zero);
         }
+
+        #region Flash
 
         public void Flash() {
             NativeMethods.FlashWindow(Handle, true);
@@ -101,10 +103,9 @@ namespace MemLib.Windows {
             NativeMethods.FlashWindowEx(ref flashInfo);
         }
 
-        //test
-        public bool NPostMessage(WindowsMessages message, uint wParam, uint lParam) {
-            return NativeMethods.SendNotifyMessage(Handle, (uint)message, new UIntPtr(wParam), new UIntPtr(lParam));
-        }
+        #endregion
+
+        #region PostMessage
 
         public bool PostMessage(WindowsMessages message, uint wParam, uint lParam) {
             return NativeMethods.PostMessage(Handle, (uint)message, new UIntPtr(wParam), new UIntPtr(lParam));
@@ -122,6 +123,10 @@ namespace MemLib.Windows {
             return NativeMethods.PostMessage(Handle, message, wParam, lParam);
         }
 
+        #endregion
+
+        #region SendMessage
+
         public IntPtr SendMessage(WindowsMessages message, uint wParam, uint lParam) {
             return NativeMethods.SendMessage(Handle, (uint)message, new UIntPtr(wParam), new IntPtr(lParam));
         }
@@ -137,6 +142,8 @@ namespace MemLib.Windows {
         public IntPtr SendMessage(uint message, UIntPtr wParam, IntPtr lParam) {
             return NativeMethods.SendMessage(Handle, message, wParam, lParam);
         }
+
+        #endregion
 
         public override string ToString() => $"Title = [{Title}] ClassName = [{ClassName}]";
 

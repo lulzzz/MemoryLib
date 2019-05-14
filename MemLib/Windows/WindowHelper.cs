@@ -59,7 +59,7 @@ namespace MemLib.Windows {
             return sb.ToString();
         }
 
-        public static bool SendInput(Input[] inputs) {
+        public static bool SendInput(params Input[] inputs) {
             if (inputs == null || inputs.Length == 0)
                 return false;
             if (!Environment.Is64BitProcess)
@@ -82,10 +82,6 @@ namespace MemLib.Windows {
                 }
             }
             return NativeMethods.SendInput(inputs64.Length, inputs64, MarshalType<Input64>.Size) != 0;
-        }
-
-        public static bool SendInput(Input input) {
-            return SendInput(new[] {input});
         }
 
         public static bool SetForegroundWindow(IntPtr windowHandle) {

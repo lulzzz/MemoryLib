@@ -123,6 +123,9 @@ namespace MemLib.Native {
 
 
         [DllImport("user32.dll")]
+        public static extern uint MapVirtualKey(Keys key, TranslationTypes translation);
+
+        [DllImport("user32.dll")]
         public static extern uint MapVirtualKey(uint key, TranslationTypes translation);
 
         [DllImport("user32.dll", SetLastError = true)]
