@@ -3,24 +3,22 @@ using MemLib.Native;
 
 namespace MemLib.Windows.Mouse {
     public sealed class MessageMouse : BaseMouse {
-        public Point Cursor { get; private set; }
-        public bool IsLeftDown { get; private set; }
-        public bool IsMiddleDown { get; private set; }
-        public bool IsRightDown { get; private set; }
+        public Point VirtualCursor { get; private set; }
+        private bool IsLeftDown { get; set; }
+        private bool IsMiddleDown { get; set; }
+        private bool IsRightDown { get; set; }
 
         public MessageMouse(RemoteWindow window) : base(window) {
-            NativeMethods.GetCursorPos(out var pos);
-            NativeMethods.ScreenToClient(window.Handle, ref pos);
-            Cursor = pos;
+            VirtualCursor = new Point();
         }
 
-        private static uint MakeLParam(int loWord, int hiWord) {
+        private static uint MakeParam(int loWord, int hiWord) {
             return (uint)((hiWord << 16) + loWord);
         }
 
-        private uint GetPosParam() => MakeLParam(Cursor.X, Cursor.Y);
+        private uint GetPosParam() => MakeParam(VirtualCursor.X, VirtualCursor.Y);
 
-        private uint GetKeysDown() {
+        private uint GetMouseKeysDown() {
             var key = Keys.None;
             if (IsLeftDown) key |= Keys.LButton;
             if (IsMiddleDown) key |= Keys.MButton;
@@ -31,8 +29,8 @@ namespace MemLib.Windows.Mouse {
         #region Overrides of BaseMouse
 
         public override void MoveTo(int x, int y) {
-            Window.PostMessage(WindowsMessages.MouseMove, GetKeysDown(), MakeLParam(x, y));
-            Cursor = new Point {X = x, Y = y};
+            Window.PostMessage(WindowsMessages.MouseMove, GetMouseKeysDown(), MakeParam(x, y));
+            VirtualCursor = new Point {X = x, Y = y};
         }
 
         public override void PressLeft() {
@@ -66,11 +64,11 @@ namespace MemLib.Windows.Mouse {
         }
 
         public override void ScrollHorizontally(int delta = 120) {
-            throw new NotImplementedException();
+            Window.PostMessage(WindowsMessages.MouseHWheel, MakeParam(0, delta), GetPosParam());
         }
 
         public override void ScrollVertically(int delta = 120) {
-            throw new NotImplementedException();
+            Window.PostMessage(WindowsMessages.MouseWheel, MakeParam(0, delta), GetPosParam());
         }
 
         #endregion

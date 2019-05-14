@@ -16,11 +16,10 @@ namespace MemLib.Windows {
             set => WindowHelper.SetWindowPlacement(Handle, value);
         }
 
+        public MessageMouse Mouse { get; }
+        public MessageKeyboard Keyboard { get; }
+
         public IntPtr Handle { get; }
-        private MessageMouse m_Mouse;
-        public MessageMouse Mouse => m_Mouse ?? (m_Mouse = new MessageMouse(this));
-        private MessageKeyboard m_Keyboard;
-        public MessageKeyboard Keyboard => m_Keyboard ?? (m_Keyboard = new MessageKeyboard(this));
         public bool IsMainWindow => m_Process.Windows.MainWindow == this;
         public bool IsActivated => NativeMethods.GetForegroundWindow() == Handle;
         public string ClassName => WindowHelper.GetClassName(Handle);
@@ -72,6 +71,8 @@ namespace MemLib.Windows {
         internal RemoteWindow(RemoteProcess process, IntPtr handle) {
             m_Process = process;
             Handle = handle;
+            Mouse = new MessageMouse(this);
+            Keyboard = new MessageKeyboard(this);
         }
 
         public bool Activate() {
@@ -80,6 +81,23 @@ namespace MemLib.Windows {
 
         public bool Close() {
             return PostMessage(WindowsMessages.Close, UIntPtr.Zero, UIntPtr.Zero);
+        }
+
+        public IEnumerable<RemoteWindow> GetChildWindowsFromPoint(int x, int y) {
+            return Children.Where(c => {
+                if (c == this) return false;
+                var p = c.Placement.NormalPosition;
+                return x >= p.Left && y >= p.Top && x <= p.Width && y <= p.Height;
+            });
+        }
+
+        public RemoteWindow GetChildWindowFromPoint(int x, int y) {
+            //return Children.FirstOrDefault(c => {
+            //    var p = c.Placement.NormalPosition;
+            //    return x >= p.Left && y >= p.Top && x <= p.Width && y <= p.Height;
+            //});
+            var hwnd = NativeMethods.RealChildWindowFromPoint(Handle, new Point {X = x, Y = y});
+            return hwnd == IntPtr.Zero ? null : new RemoteWindow(m_Process, hwnd);
         }
 
         #region Flash

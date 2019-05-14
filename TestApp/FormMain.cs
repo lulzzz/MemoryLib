@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 using MemLib;
-using Keys = MemLib.Native.Keys;
 
 namespace TestApp {
     public partial class FormMain : Form {
@@ -21,20 +20,20 @@ namespace TestApp {
             return array == null ? string.Empty : string.Join(separator, array.Select(v => $"{v:X2}"));
         }
 
-        private static int m_Counter;
+        private static int _counter;
         private void ButtonTest1_Click(object sender, EventArgs e) {
-            //Logging.Clear();
-            Logging.Log($"Counter={m_Counter++}");
+            Logging.Clear();
+            Logging.Log($"Counter={++_counter}");
             var proc = Process.GetCurrentProcess();
             //proc = Process.GetProcessesByName("sekiro").FirstOrDefault();
             //proc = Process.GetProcessesByName("ffxiv_dx11").FirstOrDefault();
             //proc = Process.GetProcessesByName("notepad++").FirstOrDefault();
             //proc = Process.GetProcessesByName("ReClass.NET").FirstOrDefault();
-            //proc = Process.GetProcessesByName("mspaint").FirstOrDefault();
+            proc = Process.GetProcessesByName("mspaint").FirstOrDefault();
             var swTotal = Stopwatch.StartNew();
 
             using (var mem = new RemoteProcess(proc)) {
-                var win = mem.Windows.MainWindow;
+
             }
 
             swTotal.Stop();

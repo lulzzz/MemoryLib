@@ -81,6 +81,18 @@ namespace MemLib.Native {
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr WindowFromPoint(Point pt);
+        
+        [DllImport("user32.dll")]
+        public static extern IntPtr ChildWindowFromPoint(IntPtr hWndParent, Point pt);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr ChildWindowFromPointEx(IntPtr hWndParent, Point pt, uint flags);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr RealChildWindowFromPoint(IntPtr hWndParent, Point pt);
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
@@ -123,9 +135,6 @@ namespace MemLib.Native {
 
 
         [DllImport("user32.dll")]
-        public static extern uint MapVirtualKey(Keys key, TranslationTypes translation);
-
-        [DllImport("user32.dll")]
         public static extern uint MapVirtualKey(uint key, TranslationTypes translation);
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -139,9 +148,6 @@ namespace MemLib.Native {
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool SendNotifyMessage(IntPtr hWnd, uint msg, UIntPtr wParam, UIntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = false)]
         public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
