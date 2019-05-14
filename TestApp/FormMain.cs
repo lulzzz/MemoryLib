@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using MemLib;
-using MemLib.Windows;
+using Keys = MemLib.Native.Keys;
 
 namespace TestApp {
     public partial class FormMain : Form {
@@ -26,14 +25,16 @@ namespace TestApp {
             Logging.Clear();
             var proc = Process.GetCurrentProcess();
             //proc = Process.GetProcessesByName("sekiro").FirstOrDefault();
+            //proc = Process.GetProcessesByName("ffxiv_dx11").FirstOrDefault();
             //proc = Process.GetProcessesByName("notepad++").FirstOrDefault();
             //proc = Process.GetProcessesByName("ReClass.NET").FirstOrDefault();
             var swTotal = Stopwatch.StartNew();
-
+            
             using (var mem = new RemoteProcess(proc)) {
-
+                var win = mem.Windows.MainWindow;
+                var m = win.Mouse;
+                m.ClickLeft(11, 20);
             }
-
             swTotal.Stop();
             Logging.Log($"TotalTime: {swTotal.Elapsed.TotalMilliseconds:N1} ms ({swTotal.Elapsed.Ticks:N1} ticks)");
         }

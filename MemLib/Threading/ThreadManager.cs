@@ -37,18 +37,12 @@ namespace MemLib.Threading {
         #region Create
 
         public RemoteThread Create(IntPtr address, bool isStarted = true) {
-            var tbi = ThreadHelper.NtQueryInformationThread(
-                ThreadHelper.CreateRemoteThread(m_Process.Handle, address, IntPtr.Zero, ThreadCreationFlags.Suspended)
-            );
-
+            ThreadHelper.CreateRemoteThread(m_Process.Handle, address, IntPtr.Zero, out var threadId, ThreadCreationFlags.Suspended);
             ProcessThread nativeThread;
-            do
-            {
-                nativeThread = m_Process.Threads.NativeThreads.FirstOrDefault(t => t.Id == tbi.ThreadId.ToInt64());
+            do {
+                nativeThread = m_Process.Threads.NativeThreads.FirstOrDefault(t => t.Id == threadId);
             } while (nativeThread == null);
-
             var result = new RemoteThread(m_Process, nativeThread);
-
             if (isStarted)
                 result.Resume();
             return result;
@@ -56,19 +50,12 @@ namespace MemLib.Threading {
 
         public RemoteThread Create(IntPtr address, dynamic parameter, bool isStarted = true) {
             var marshalledParameter = MarshalValue.Marshal(m_Process, parameter);
-
-            ThreadBasicInformation tbi = ThreadHelper.NtQueryInformationThread(
-                ThreadHelper.CreateRemoteThread(m_Process.Handle, address, marshalledParameter.Reference, ThreadCreationFlags.Suspended)
-                );
-
+            ThreadHelper.CreateRemoteThread(m_Process.Handle, address, marshalledParameter.Reference, out int threadId, ThreadCreationFlags.Suspended);
             ProcessThread nativeThread;
-            do
-            {
-                nativeThread = m_Process.Threads.NativeThreads.FirstOrDefault(t => t.Id == tbi.ThreadId.ToInt64());
+            do {
+                nativeThread = m_Process.Threads.NativeThreads.FirstOrDefault(t => t.Id == threadId);
             } while (nativeThread == null);
-
             var result = new RemoteThread(m_Process, nativeThread, marshalledParameter);
-
             if (isStarted)
                 result.Resume();
             return result;

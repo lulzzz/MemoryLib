@@ -4,12 +4,18 @@ namespace MemLib.Windows.Mouse {
     public sealed class SendInputMouse : BaseMouse {
         internal SendInputMouse(RemoteWindow window) : base(window) { }
 
+        private static Input CreateInput() {
+            return new Input(InputTypes.Mouse);
+        }
+
         #region Overrides of BaseMouse
 
-        protected override void MoveToAbsolute(int x, int y) {
+        public override void MoveTo(int x, int y) {
+            x += Window.X;
+            y += Window.Y;
             var input = CreateInput();
-            input.Mouse.DeltaX = CalculateAbsoluteCoordinateX(x);
-            input.Mouse.DeltaY = CalculateAbsoluteCoordinateY(y);
+            input.Mouse.DeltaX = x * 65536 / NativeMethods.GetSystemMetrics(SystemMetrics.CxScreen);
+            input.Mouse.DeltaY = y * 65536 / NativeMethods.GetSystemMetrics(SystemMetrics.CyScreen);
             input.Mouse.Flags = MouseFlags.Move | MouseFlags.Absolute;
             input.Mouse.MouseData = 0;
             WindowHelper.SendInput(input);
@@ -66,17 +72,5 @@ namespace MemLib.Windows.Mouse {
         }
 
         #endregion
-
-        private static int CalculateAbsoluteCoordinateX(int x) {
-            return x * 65536 / NativeMethods.GetSystemMetrics(SystemMetrics.CxScreen);
-        }
-
-        private static int CalculateAbsoluteCoordinateY(int y) {
-            return y * 65536 / NativeMethods.GetSystemMetrics(SystemMetrics.CyScreen);
-        }
-
-        private static Input CreateInput() {
-            return new Input(InputTypes.Mouse);
-        }
     }
 }

@@ -41,7 +41,7 @@ namespace MemLib.Native {
 
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern SafeMemoryHandle CreateRemoteThread(SafeMemoryHandle hProcess, IntPtr lpThreadAttributes, ulong dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, ThreadCreationFlags dwCreationFlags, out uint lpThreadId);
+        public static extern SafeMemoryHandle CreateRemoteThread(SafeMemoryHandle hProcess, IntPtr lpThreadAttributes, ulong dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, ThreadCreationFlags dwCreationFlags, out int lpThreadId);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern SafeMemoryHandle OpenThread(ThreadAccessFlags dwDesiredAccess, bool bInheritHandle, int dwThreadId);
@@ -132,7 +132,19 @@ namespace MemLib.Native {
         public static extern int SendInput(int nInputs, Input[] pInputs, int cbSize);
 
         [DllImport("user32.dll", SetLastError = true)]
+        public static extern int SendInput(int nInputs, Input64[] pInputs, int cbSize);
+
+        [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SendNotifyMessage(IntPtr hWnd, uint msg, UIntPtr wParam, UIntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = false)]
+        public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetCursorPos(out Point lpPoint);
 
         #endregion
 

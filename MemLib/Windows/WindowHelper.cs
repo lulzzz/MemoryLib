@@ -60,9 +60,28 @@ namespace MemLib.Windows {
         }
 
         public static bool SendInput(Input[] inputs) {
-            if (inputs != null && inputs.Length != 0)
+            if (inputs == null || inputs.Length == 0)
+                return false;
+            if (!Environment.Is64BitProcess)
                 return NativeMethods.SendInput(inputs.Length, inputs, MarshalType<Input>.Size) != 0;
-            return false;
+            var inputs64 = new Input64[inputs.Length];
+            for (var i = 0; i < inputs.Length; i++) {
+                inputs64[i] = new Input64(inputs[i].Type);
+                switch (inputs[i].Type) {
+                    case InputTypes.Mouse:
+                        inputs64[i].Mouse = inputs[i].Mouse;
+                        break;
+                    case InputTypes.Keyboard:
+                        inputs64[i].Keyboard = inputs[i].Keyboard;
+                        break;
+                    case InputTypes.Hardware:
+                        inputs64[i].Hardware = inputs[i].Hardware;
+                        break;
+                    default:
+                        return false;
+                }
+            }
+            return NativeMethods.SendInput(inputs64.Length, inputs64, MarshalType<Input64>.Size) != 0;
         }
 
         public static bool SendInput(Input input) {

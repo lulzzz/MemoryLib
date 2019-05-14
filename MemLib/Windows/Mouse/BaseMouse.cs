@@ -10,7 +10,7 @@ namespace MemLib.Windows.Mouse {
 
         #region Abstract Methods
 
-        protected abstract void MoveToAbsolute(int x, int y);
+        public abstract void MoveTo(int x, int y);
         public abstract void PressLeft();
         public abstract void PressMiddle();
         public abstract void PressRight();
@@ -67,10 +67,6 @@ namespace MemLib.Windows.Mouse {
             ClickLeft(x, y);
             Thread.Sleep(10);
             ClickLeft();
-        }
-
-        public void MoveTo(int x, int y) {
-            MoveToAbsolute(Window.X + x, Window.Y + y);
         }
 
         #endregion

@@ -29,7 +29,6 @@ namespace MemLib.Threading {
             }
         }
 
-        [DebuggerStepThrough]
         internal RemoteThread(RemoteProcess process, ProcessThread thread) {
             m_Process = process;
             Native = thread ?? throw new ArgumentNullException(nameof(thread));
@@ -37,8 +36,7 @@ namespace MemLib.Threading {
             Handle = ThreadHelper.OpenThread(ThreadAccessFlags.AllAccess, thread.Id);
         }
 
-        [DebuggerStepThrough]
-        internal RemoteThread(RemoteProcess process, ProcessThread thread, IMarshalledValue parameter = null) : this(process, thread) {
+        internal RemoteThread(RemoteProcess process, ProcessThread thread, IMarshalledValue parameter) : this(process, thread) {
             m_Parameter = parameter;
             m_ParameterCleaner = new Task(() => {
                 Join();
@@ -55,8 +53,8 @@ namespace MemLib.Threading {
             Native = m_Process.Threads.NativeThreads.FirstOrDefault(t => t.Id == Native.Id);
         }
 
-        public void Join() {
-            ThreadHelper.WaitForSingleObject(Handle);
+        public WaitValues Join() {
+            return ThreadHelper.WaitForSingleObject(Handle);
         }
 
         public WaitValues Join(TimeSpan time) {
@@ -81,6 +79,10 @@ namespace MemLib.Threading {
                 ThreadHelper.TerminateThread(Handle, exitCode);
         }
 
+        public IntPtr GetExitCode() {
+            return GetExitCode<IntPtr>();
+        }
+
         public T GetExitCode<T>() {
             var ret = ThreadHelper.GetExitCodeThread(Handle);
             return ret.HasValue ? MarshalType<T>.PtrToObject(m_Process, ret.Value) : default;
@@ -91,10 +93,6 @@ namespace MemLib.Threading {
         public void Dispose() {
             if (!Handle.IsClosed)
                 Handle.Close();
-            if (m_Parameter != null && m_Process.IsRunning) {
-                m_ParameterCleaner.Dispose();
-                m_Parameter.Dispose();
-            }
             GC.SuppressFinalize(this);
         }
 

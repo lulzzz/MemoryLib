@@ -12,9 +12,7 @@ namespace MemLib.Modules {
         internal IEnumerable<NativeModule> NativeModules => InternalEnumProcessModules();
 
         private RemoteModule m_MainModule;
-
-        public RemoteModule MainModule =>
-            m_MainModule ?? (m_MainModule = FetchModule(m_Process.Native.MainModule.ModuleName));
+        public RemoteModule MainModule => m_MainModule ?? (m_MainModule = FetchModule(m_Process.Native.MainModule?.ModuleName));
         public IEnumerable<RemoteModule> RemoteModules => NativeModules.Select(m => new RemoteModule(m_Process, m));
 
         public RemoteModule this[string moduleName] => FetchModule(moduleName);
@@ -32,11 +30,6 @@ namespace MemLib.Modules {
         
         [DebuggerStepThrough]
         public InjectedModule Inject(string moduleFile, bool mustBeDisposed = true) {
-            if (!File.Exists(moduleFile)) {
-                moduleFile = FindFullPath(moduleFile);
-                if(!File.Exists(moduleFile))
-                    throw new FileNotFoundException("File not found.", moduleFile);
-            }
             var module = InternalInject(moduleFile, mustBeDisposed);
             if (module != null && !m_InjectedModules.Contains(module)) 
                 m_InjectedModules.Add(module);
@@ -44,7 +37,7 @@ namespace MemLib.Modules {
         }
 
         public void Eject(RemoteModule module) {
-            if (!module.IsValid) return;
+            if (module == null || !module.IsValid) return;
             
             var injected = m_InjectedModules.FirstOrDefault(m => m.Equals(module));
             if (injected != null)
@@ -59,18 +52,6 @@ namespace MemLib.Modules {
                 InternalEject(module);
         }
 
-        private static string FindFullPath(string fileName) {
-            fileName = Environment.ExpandEnvironmentVariables(fileName);
-            if (File.Exists(fileName)) return Path.GetFullPath(fileName);
-            if (Path.GetDirectoryName(fileName) != string.Empty) return null;
-            foreach (var pathVal in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';')) {
-                var path = pathVal.Trim();
-                if (!string.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, fileName)))
-                    return Path.GetFullPath(path);
-            }
-            return null;
-        }
-
         private IEnumerable<NativeModule> InternalEnumProcessModules() {
             var flags = m_Process.Is64Bit ? ListModulesFlags.ListModules64Bit : ListModulesFlags.ListModules32Bit;
             if (!ModuleHelper.EnumProcessModules(m_Process.Handle, out var modHandles, flags))
@@ -81,8 +62,7 @@ namespace MemLib.Modules {
 
         private InjectedModule InternalInject(string path, bool mustBeDisposed) {
             var thread = m_Process.Threads.CreateAndJoin(m_Process["kernel32"]["LoadLibraryA"].BaseAddress, path);
-            var exitCode = thread.GetExitCode<int>();
-            if (exitCode == 0) return null;
+            if (thread.GetExitCode<IntPtr>() == IntPtr.Zero) return null;
             var moduleName = Path.GetFileName(path);
             var nativeMod = m_Process.Modules.NativeModules.First(m => m.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
             return new InjectedModule(m_Process, nativeMod, mustBeDisposed);

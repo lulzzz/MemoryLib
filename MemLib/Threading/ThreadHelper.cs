@@ -21,13 +21,19 @@ namespace MemLib.Threading {
             return handle;
         }
 
+        public static SafeMemoryHandle CreateRemoteThread(SafeMemoryHandle processHandle, IntPtr startAddress, IntPtr parameter, out int threadId, ThreadCreationFlags creationFlags = ThreadCreationFlags.Run) {
+            var handle = NativeMethods.CreateRemoteThread(processHandle, IntPtr.Zero, 0, startAddress, parameter, creationFlags, out threadId);
+            if(handle.IsInvalid || handle.IsClosed)
+                throw new Win32Exception();
+            return handle;
+        }
+
         private static readonly IntPtr STILL_ACTIVE = new IntPtr(259);
 
         public static IntPtr? GetExitCodeThread(SafeMemoryHandle threadHandle) {
             if (!NativeMethods.GetExitCodeThread(threadHandle, out var exitCode))
                 throw new Win32Exception();
 
-            // If the thread is still active
             if (exitCode == STILL_ACTIVE && NativeMethods.WaitForSingleObject(threadHandle, 0) == WaitValues.Timeout)
                 return null;
 

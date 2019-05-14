@@ -101,16 +101,37 @@ namespace MemLib.Windows {
             NativeMethods.FlashWindowEx(ref flashInfo);
         }
 
+        //test
+        public bool NPostMessage(WindowsMessages message, uint wParam, uint lParam) {
+            return NativeMethods.SendNotifyMessage(Handle, (uint)message, new UIntPtr(wParam), new UIntPtr(lParam));
+        }
+
+        public bool PostMessage(WindowsMessages message, uint wParam, uint lParam) {
+            return NativeMethods.PostMessage(Handle, (uint)message, new UIntPtr(wParam), new UIntPtr(lParam));
+        }
+
         public bool PostMessage(WindowsMessages message, UIntPtr wParam, UIntPtr lParam) {
             return NativeMethods.PostMessage(Handle, (uint)message, wParam, lParam);
+        }
+
+        public bool PostMessage(uint message, uint wParam, uint lParam) {
+            return NativeMethods.PostMessage(Handle, message, new UIntPtr(wParam), new UIntPtr(lParam));
         }
 
         public bool PostMessage(uint message, UIntPtr wParam, UIntPtr lParam) {
             return NativeMethods.PostMessage(Handle, message, wParam, lParam);
         }
 
+        public IntPtr SendMessage(WindowsMessages message, uint wParam, uint lParam) {
+            return NativeMethods.SendMessage(Handle, (uint)message, new UIntPtr(wParam), new IntPtr(lParam));
+        }
+
         public IntPtr SendMessage(WindowsMessages message, UIntPtr wParam, IntPtr lParam) {
             return NativeMethods.SendMessage(Handle, (uint)message, wParam, lParam);
+        }
+
+        public IntPtr SendMessage(uint message, uint wParam, uint lParam) {
+            return NativeMethods.SendMessage(Handle, message, new UIntPtr(wParam), new IntPtr(lParam));
         }
 
         public IntPtr SendMessage(uint message, UIntPtr wParam, IntPtr lParam) {

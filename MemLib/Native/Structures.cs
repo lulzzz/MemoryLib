@@ -26,14 +26,19 @@ namespace MemLib.Native {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ThreadBasicInformation {
-        public readonly uint ExitStatus;
-        public readonly IntPtr TebBaseAdress;
+    public struct ClientId {
         public readonly IntPtr ProcessId;
         public readonly IntPtr ThreadId;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ThreadBasicInformation {
+        public readonly int ExitStatus;
+        public readonly IntPtr TebBaseAdress;
+        public ClientId ClientId;
         public readonly IntPtr AffinityMask;
-        public readonly uint Priority;
-        public readonly uint BasePriority;
+        public readonly int Priority;
+        public readonly int BasePriority;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -111,15 +116,21 @@ namespace MemLib.Native {
         public Input(InputTypes type) : this() {
             Type = type;
         }
-
-        [FieldOffset(0)]
-        public InputTypes Type;
-        [FieldOffset(sizeof (int))]
-        public MouseInput Mouse;
-        [FieldOffset(sizeof(int))]
-        public KeyboardInput Keyboard;
-        [FieldOffset(sizeof(int))]
-        public HardwareInput Hardware;
+        [FieldOffset(0)] public InputTypes Type;
+        [FieldOffset(4)] public MouseInput Mouse;
+        [FieldOffset(4)] public KeyboardInput Keyboard;
+        [FieldOffset(4)] public HardwareInput Hardware;
+    }
+    
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Input64 {
+        public Input64(InputTypes type) : this() {
+            Type = type;
+        }
+        [FieldOffset(0)] public InputTypes Type;
+        [FieldOffset(8)] public MouseInput Mouse;
+        [FieldOffset(8)] public KeyboardInput Keyboard;
+        [FieldOffset(8)] public HardwareInput Hardware;
     }
 
     [StructLayout(LayoutKind.Sequential)]
