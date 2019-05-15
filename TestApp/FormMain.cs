@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 using MemLib;
-using MemLib.Windows;
 
 namespace TestApp {
     public partial class FormMain : Form {
@@ -29,15 +27,13 @@ namespace TestApp {
             var proc = Process.GetCurrentProcess();
             //proc = Process.GetProcessesByName("sekiro").FirstOrDefault();
             //proc = Process.GetProcessesByName("ffxiv_dx11").FirstOrDefault();
-            proc = Process.GetProcessesByName("notepad++").FirstOrDefault();
+            //proc = Process.GetProcessesByName("notepad++").FirstOrDefault();
             //proc = Process.GetProcessesByName("ReClass.NET").FirstOrDefault();
             //proc = Process.GetProcessesByName("mspaint").FirstOrDefault();
             var swTotal = Stopwatch.StartNew();
 
             using (var mem = new RemoteProcess(proc)) {
-                var win = mem.Windows.MainWindow;
-                var sc = new ScreenCapture();
-                var img = sc.CaptureWindow(win.Handle);
+                
             }
 
             swTotal.Stop();

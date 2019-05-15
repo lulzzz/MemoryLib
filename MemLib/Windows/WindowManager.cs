@@ -11,7 +11,7 @@ namespace MemLib.Windows {
 
         public IntPtr MainWindowHandle => m_Process.Native.MainWindowHandle;
         public RemoteWindow MainWindow => new RemoteWindow(m_Process, MainWindowHandle);
-        public IEnumerable<RemoteWindow> ChildWindows => ChildWindowHandles.Select(handle => new RemoteWindow(m_Process, handle));
+        public IEnumerable<RemoteWindow> RemoteWindows => WindowHandles.Select(handle => new RemoteWindow(m_Process, handle));
 
         public IEnumerable<RemoteWindow> this[string windowTitle] => GetWindowsByTitle(windowTitle);
 
