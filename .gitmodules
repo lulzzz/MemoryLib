@@ -1,3 +1,4 @@
 [submodule "MemLibNative"]
 	path = MemLibNative
 	url = https://github.com/pohky/MemLibNative.git
+	branch = master
