@@ -33,7 +33,6 @@ namespace TestApp {
             var swTotal = Stopwatch.StartNew();
 
             using (var mem = new RemoteProcess(proc)) {
-                
             }
 
             swTotal.Stop();
