@@ -126,12 +126,6 @@
     <Compile Include="Windows\WindowHelper.cs" />
     <Compile Include="Windows\WindowManager.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MemLibNative\MemLibNative.vcxproj">
-      <Project>{76e1c951-6df8-438e-8c8b-20f0d22e4f05}</Project>
-      <Name>MemLibNative</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
