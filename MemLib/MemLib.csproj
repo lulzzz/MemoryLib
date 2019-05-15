@@ -58,6 +58,7 @@
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,7 @@
     <Compile Include="Windows\Mouse\MessageMouse.cs" />
     <Compile Include="Windows\Mouse\SendInputMouse.cs" />
     <Compile Include="Windows\RemoteWindow.cs" />
+    <Compile Include="Windows\ScreenCapture.cs" />
     <Compile Include="Windows\WindowHelper.cs" />
     <Compile Include="Windows\WindowManager.cs" />
   </ItemGroup>
