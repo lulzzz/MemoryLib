@@ -8,9 +8,9 @@ using MemLib.Native;
 namespace MemLib.Modules {
     [DebuggerStepThrough]
     internal static class ModuleHelper {
-        public static string GetModuleFileName(SafeMemoryHandle hProcess, IntPtr hModule) {
-            var sb = new StringBuilder(260);
-            if (NativeMethods.GetModuleFileNameEx(hProcess, hModule, sb, sb.Capacity) != 0)
+        public static string GetModulePath(SafeMemoryHandle hProcess, IntPtr hModule) {
+            var sb = new StringBuilder(1024);
+            if (NativeMethods.GetModuleFileNameEx(hProcess, hModule, sb, sb.Capacity * 2) != 0)
                 return sb.ToString();
             return string.Empty;
         }
@@ -35,7 +35,7 @@ namespace MemLib.Modules {
         }
 
         public static string UnDecorateSymbolName(string name, UnDecorateFlags flags = UnDecorateFlags.NameOnly) {
-            var sb = new StringBuilder(260);
+            var sb = new StringBuilder(1024);
             return NativeMethods.UnDecorateSymbolName(name, sb, sb.Capacity, flags) ? sb.ToString() : name;
         }
     }

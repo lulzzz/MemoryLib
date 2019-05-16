@@ -54,20 +54,16 @@ namespace MemLib.Assembly {
 
         #endregion
 
-        #region Append
+        #region Add
 
-        public void Append(string asm) {
-            m_Code.Append(asm);
+        public void Add(string asm, params object[] args) {
+            m_Code.AppendLine(args.Length == 0 ? asm : string.Format(asm, args));
         }
 
-        public void AppendLine(string asm, params object[] args) {
-            m_Code.AppendLine(string.Format(asm, args));
-        }
-
-        public void AppendLines(IEnumerable<string> asmStrings) {
+        public void Add(IEnumerable<string> asmStrings) {
             if(asmStrings == null) return;
             foreach (var asmString in asmStrings) {
-                AppendLine(asmString);
+                m_Code.AppendLine(asmString);
             }
         }
 
@@ -76,24 +72,29 @@ namespace MemLib.Assembly {
         #region Prepend
 
         public void Prepend(string asm, params object[] args) {
-            Insert(0, asm, args);
+            if (!asm.EndsWith(Environment.NewLine)) asm += Environment.NewLine;
+            m_Code.Insert(0, string.Format(asm, args));
         }
 
-        public void PrependLine(string asm, params object[] args) {
-            InsertLine(0, asm, args);
+        public void Prepend(IEnumerable<string> asmStrings) {
+            Insert(0, asmStrings);
         }
 
         #endregion
 
         #region Insert
 
-        public void InsertLine(int index, string asm, params object[] args) {
-            if (!asm.EndsWith("\n")) asm += "\n";
+        public void Insert(int index, string asm, params object[] args) {
             m_Code.Insert(index, string.Format(asm, args));
         }
 
-        public void Insert(int index, string asm, params object[] args) {
-            m_Code.Insert(index, string.Format(asm, args));
+        public void Insert(int index, IEnumerable<string> asmStrings) {
+            if (asmStrings == null) return;
+            var sb = new StringBuilder();
+            foreach (var asmString in asmStrings) {
+                sb.AppendLine(asmString);
+            }
+            m_Code.Insert(index, sb.ToString());
         }
 
         #endregion

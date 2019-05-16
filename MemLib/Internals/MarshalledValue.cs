@@ -10,7 +10,7 @@ namespace MemLib.Internals {
 
     internal sealed class MarshalledValue<T> : IMarshalledValue {
         private readonly RemoteProcess m_Process;
-        public T Value { get; private set; }
+        public T Value { get; }
         public RemoteAllocation Allocated { get; private set; }
         public IntPtr Reference { get; private set; }
         public Type Type { get; }

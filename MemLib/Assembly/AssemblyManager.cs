@@ -58,7 +58,7 @@ namespace MemLib.Assembly {
 
             AssemblyTransaction t;
             using (t = BeginTransaction()) {
-                t.Append(calling.FormatCall(address, marshalledParameters.Select(p => p.Reference).ToArray()));
+                t.Add(calling.FormatCall(address, marshalledParameters.Select(p => p.Reference).ToArray()));
             }
             
             foreach (var parameter in marshalledParameters) {

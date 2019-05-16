@@ -12,11 +12,17 @@ namespace MemLib.Modules {
 
         public NativeModule(SafeMemoryHandle hProcess, IntPtr hModule) {
             BaseAddress = hModule;
-            FileName = ModuleHelper.GetModuleFileName(hProcess, hModule);
+            FileName = ModuleHelper.GetModulePath(hProcess, hModule);
             ModuleName = string.IsNullOrEmpty(FileName) ? string.Empty : Path.GetFileName(FileName);
+
             if (ModuleHelper.GetModuleInformation(hProcess, hModule, out var info)) {
                 EntryPointAddress = info.EntryPoint;
                 ModuleMemorySize = (int) info.SizeOfImage.ToInt64();
+                BaseAddress = info.lpBaseOfDll;
+            } else {
+                EntryPointAddress = IntPtr.Zero;
+                ModuleMemorySize = 0;
+                BaseAddress = hModule;
             }
         }
 

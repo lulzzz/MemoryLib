@@ -7,6 +7,7 @@ using MemLib.PeHeader.Structures;
 namespace MemLib.PeHeader {
     public class PeHeaderParser : RemotePointer {
         public bool Is64Bit => Read<ushort>((int)DosHeader.e_lfanew + 0x04) == 0x8664;
+        public bool IsPeFile => DosHeader.e_magic == 0x4D5A;
         public ImageDosHeader DosHeader { get; }
         public ImageNtHeader NtHeader { get; }
         public ImageExportDirectory ExportDirectory { get; }

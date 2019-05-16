@@ -12,20 +12,14 @@ namespace MemLib.Modules {
         public string Path => Native.FileName;
         public long Size => Native.ModuleMemorySize;
         public bool IsMainModule => m_Process.Native.MainModule != null && m_Process.Native.MainModule.BaseAddress == BaseAddress;
-
-        public IEnumerable<RemoteFunction> Exports => PeHeader.ExportFunctions.Select(ExportToRemote);
-
         public override bool IsValid => base.IsValid && m_Process.Modules.NativeModules.Any(m => m.BaseAddress == BaseAddress && m.ModuleName == Name);
-        
+        public IEnumerable<RemoteFunction> Exports => PeHeader.ExportFunctions.Select(f => new RemoteFunction(m_Process, BaseAddress + f.RelativeAddress, f.Name));
+
         public RemoteFunction this[string functionName] => FindFunction(functionName);
 
         internal RemoteModule(RemoteProcess process, NativeModule module) : base(process, module.BaseAddress) {
             Native = module;
             PeHeader = new PeHeaderParser(process, module.BaseAddress);
-        }
-
-        private RemoteFunction ExportToRemote(ExportFunction func) {
-            return new RemoteFunction(m_Process, BaseAddress + func.RelativeAddress, func.Name);
         }
 
         public void Eject() {

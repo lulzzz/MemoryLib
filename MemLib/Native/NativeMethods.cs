@@ -141,11 +141,11 @@ namespace MemLib.Native {
         [DllImport("psapi.dll", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern bool EnumProcessModulesEx(SafeMemoryHandle hProcess, [Out] IntPtr lphModule, int cb, out int lpcbNeeded, ListModulesFlags dwFilterFlag);
 
-        [DllImport("psapi.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern uint GetModuleFileNameEx(SafeMemoryHandle hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
-
-        [DllImport("psapi.dll", SetLastError = true)]
+        [DllImport("psapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern bool GetModuleInformation(SafeMemoryHandle hProcess, IntPtr hModule, [Out] out ModuleInfo lpmodinfo, int cb);
+
+        [DllImport("psapi.dll", CharSet = CharSet.Auto, SetLastError = true, BestFitMapping = false)]
+        public static extern uint GetModuleFileNameEx(SafeMemoryHandle hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
 
         #endregion
 
