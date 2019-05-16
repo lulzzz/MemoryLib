@@ -28,6 +28,10 @@ namespace MemLib.Assembly {
             return new AssemblyTransaction(m_Process, autoExecute);
         }
 
+        public AssemblyTransaction BeginTransaction(int codeOffset, bool autoExecute = true) {
+            return new AssemblyTransaction(m_Process, codeOffset, autoExecute);
+        }
+
         #endregion
 
         #region Execute

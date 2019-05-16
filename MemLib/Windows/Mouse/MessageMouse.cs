@@ -22,49 +22,53 @@ namespace MemLib.Windows.Mouse {
             return (uint) key;
         }
 
+        private void Message(WindowsMessages message, uint wParam, uint lParam) {
+            Window.PostMessage(message, wParam, lParam);
+        }
+
         #region Overrides of BaseMouse
 
         public override void MoveTo(int x, int y) {
-            Window.PostMessage(WindowsMessages.MouseMove, GetMouseKeysDown(), MakeParam(x, y));
+            Message(WindowsMessages.MouseMove, GetMouseKeysDown(), MakeParam(x, y));
             VirtualCursor = new Point {X = x, Y = y};
         }
 
         public override void PressLeft() {
-            Window.PostMessage(WindowsMessages.LButtonDown, (uint)Keys.LButton, GetPosParam());
+            Message(WindowsMessages.LButtonDown, (uint)Keys.LButton, GetPosParam());
             IsLeftDown = true;
         }
 
         public override void PressMiddle() {
-            Window.PostMessage(WindowsMessages.MButtonDown, (uint)Keys.MButton, GetPosParam());
+            Message(WindowsMessages.MButtonDown, (uint)Keys.MButton, GetPosParam());
             IsMiddleDown = true;
         }
 
         public override void PressRight() {
-            Window.PostMessage(WindowsMessages.RButtonDown, (uint)Keys.RButton, GetPosParam());
+            Message(WindowsMessages.RButtonDown, (uint)Keys.RButton, GetPosParam());
             IsRightDown = true;
         }
 
         public override void ReleaseLeft() {
-            Window.PostMessage(WindowsMessages.LButtonUp, (uint)Keys.LButton, GetPosParam());
+            Message(WindowsMessages.LButtonUp, (uint)Keys.LButton, GetPosParam());
             IsLeftDown = false;
         }
 
         public override void ReleaseMiddle() {
-            Window.PostMessage(WindowsMessages.MButtonUp, (uint)Keys.MButton, GetPosParam());
+            Message(WindowsMessages.MButtonUp, (uint)Keys.MButton, GetPosParam());
             IsMiddleDown = false;
         }
 
         public override void ReleaseRight() {
-            Window.PostMessage(WindowsMessages.RButtonUp, (uint)Keys.RButton, GetPosParam());
+            Message(WindowsMessages.RButtonUp, (uint)Keys.RButton, GetPosParam());
             IsRightDown = false;
         }
 
         public override void ScrollHorizontally(int delta = 120) {
-            Window.PostMessage(WindowsMessages.MouseHWheel, MakeParam(0, delta), GetPosParam());
+            Message(WindowsMessages.MouseHWheel, MakeParam(0, delta), GetPosParam());
         }
 
         public override void ScrollVertically(int delta = 120) {
-            Window.PostMessage(WindowsMessages.MouseWheel, MakeParam(0, delta), GetPosParam());
+            Message(WindowsMessages.MouseWheel, MakeParam(0, delta), GetPosParam());
         }
 
         #endregion

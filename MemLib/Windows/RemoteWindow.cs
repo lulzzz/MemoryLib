@@ -76,7 +76,7 @@ namespace MemLib.Windows {
         }
 
         public bool Activate() {
-            return WindowHelper.SetForegroundWindow(Handle);
+            return !IsActivated && WindowHelper.SetForegroundWindow(Handle);
         }
 
         public bool Close() {
@@ -92,10 +92,6 @@ namespace MemLib.Windows {
         }
 
         public RemoteWindow GetChildWindowFromPoint(int x, int y) {
-            //return Children.FirstOrDefault(c => {
-            //    var p = c.Placement.NormalPosition;
-            //    return x >= p.Left && y >= p.Top && x <= p.Width && y <= p.Height;
-            //});
             var hwnd = NativeMethods.RealChildWindowFromPoint(Handle, new Point {X = x, Y = y});
             return hwnd == IntPtr.Zero ? null : new RemoteWindow(m_Process, hwnd);
         }

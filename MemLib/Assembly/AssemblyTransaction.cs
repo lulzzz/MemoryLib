@@ -9,10 +9,20 @@ namespace MemLib.Assembly {
         private readonly StringBuilder m_Code;
         private IntPtr m_ExitCode;
 
-        public IntPtr BaseAddress { get; }
+        public int CodeOffset { get; set; }
+        public IntPtr BaseAddress { get; private set; }
         public bool IsAutoExecuted { get; set; }
 
         public AssemblyTransaction(RemoteProcess process, bool autoExecute) : this(process, IntPtr.Zero, autoExecute){}
+
+        public AssemblyTransaction(RemoteProcess process, int codeOffset, bool autoExecute) : this(process, IntPtr.Zero, autoExecute) {
+            CodeOffset = codeOffset;
+        }
+
+        public AssemblyTransaction(RemoteProcess process, IntPtr address, int codeOffset, bool autoExecute) : this(process, address, autoExecute) {
+            CodeOffset = codeOffset;
+        }
+
         public AssemblyTransaction(RemoteProcess process, IntPtr address, bool autoExecute) {
             m_Process = process;
             m_Code = new StringBuilder();
@@ -104,13 +114,17 @@ namespace MemLib.Assembly {
         public void Dispose() {
             if (BaseAddress != IntPtr.Zero) {
                 if (IsAutoExecuted) {
-                    m_ExitCode = m_Process.Assembly.InjectAndExecute<IntPtr>(m_Code.ToString(), BaseAddress);
+                    m_Process.Assembly.Inject(m_Code.ToString(), BaseAddress);
+                    m_ExitCode = m_Process.Assembly.Execute(BaseAddress + CodeOffset);
                 } else {
                     m_Process.Assembly.Inject(m_Code.ToString(), BaseAddress);
                 }
             }
             if (BaseAddress == IntPtr.Zero && IsAutoExecuted) {
-                m_ExitCode = m_Process.Assembly.InjectAndExecute<IntPtr>(m_Code.ToString());
+                using (var alloc = m_Process.Assembly.Inject(m_Code.ToString())) {
+                    BaseAddress = alloc.BaseAddress;
+                    m_ExitCode = m_Process.Assembly.Execute(alloc.BaseAddress);
+                }
             }
         }
 
