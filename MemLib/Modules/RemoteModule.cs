@@ -11,7 +11,7 @@ namespace MemLib.Modules {
         public string Name => Native.ModuleName;
         public string Path => Native.FileName;
         public long Size => Native.ModuleMemorySize;
-        public bool IsMainModule => m_Process.Native.MainModule.BaseAddress == BaseAddress;
+        public bool IsMainModule => m_Process.Native.MainModule != null && m_Process.Native.MainModule.BaseAddress == BaseAddress;
 
         public IEnumerable<RemoteFunction> Exports => PeHeader.ExportFunctions.Select(ExportToRemote);
 

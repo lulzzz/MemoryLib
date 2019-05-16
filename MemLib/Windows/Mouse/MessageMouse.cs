@@ -1,5 +1,4 @@
-﻿using System;
-using MemLib.Native;
+﻿using MemLib.Native;
 
 namespace MemLib.Windows.Mouse {
     public sealed class MessageMouse : BaseMouse {
@@ -12,10 +11,7 @@ namespace MemLib.Windows.Mouse {
             VirtualCursor = new Point();
         }
 
-        private static uint MakeParam(int loWord, int hiWord) {
-            return (uint)((hiWord << 16) + loWord);
-        }
-
+        private static uint MakeParam(int loWord, int hiWord) => (uint)((hiWord << 16) + loWord);
         private uint GetPosParam() => MakeParam(VirtualCursor.X, VirtualCursor.Y);
 
         private uint GetMouseKeysDown() {

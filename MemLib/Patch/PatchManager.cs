@@ -17,14 +17,13 @@ namespace MemLib.Patch {
         #region CreatePatch
 
         public RemotePatch CreatePatch(IntPtr address, byte[] patchBytes, bool apply = true, bool mustBeDisposed = true) {
-            return CreatePatch(address.ToInt64().ToString("X"), address, patchBytes, apply, mustBeDisposed);
+            return CreatePatch(address.ToInt64().ToString("X8"), address, patchBytes, apply, mustBeDisposed);
         }
 
         public RemotePatch CreatePatch(string name, IntPtr address, byte[] patchBytes, bool apply = true, bool mustBeDisposed = true) {
             var patch = new RemotePatch(m_Process, name, address, patchBytes, mustBeDisposed);
+            if(apply) patch.Apply();
             m_RemotePatches.Add(patch);
-            if(apply)
-                patch.Apply();
             return patch;
         }
 
@@ -33,15 +32,16 @@ namespace MemLib.Patch {
         #region RemovePatch
 
         public void RemovePatch(string patchName) {
-            var patch = m_RemotePatches.FirstOrDefault(p => p.Name.Equals(patchName, StringComparison.OrdinalIgnoreCase));
+            var patch = m_RemotePatches.FirstOrDefault(p => p.Name.Equals(patchName, StringComparison.Ordinal));
             if(patch != null)
                 RemovePatch(patch);
         }
 
         public void RemovePatch(RemotePatch patch) {
-            if(m_RemotePatches.Contains(patch))
+            if (m_RemotePatches.Contains(patch)) {
                 m_RemotePatches.Remove(patch);
-            patch.InternalRemove();
+            }
+            patch?.InternalRemove();
         }
 
         #endregion

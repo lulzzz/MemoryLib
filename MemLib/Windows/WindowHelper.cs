@@ -4,32 +4,18 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using MemLib.Internals;
 using MemLib.Native;
 
 namespace MemLib.Windows {
     [DebuggerStepThrough]
     internal static class WindowHelper {
-        public static IEnumerable<IntPtr> EnumAllWindows() {
-            var list = new List<IntPtr>();
-            foreach (var topWindow in EnumTopLevelWindows()) {
-                list.Add(topWindow);
-                list.AddRange(EnumChildWindows(topWindow));
-            }
-            return list;
-        }
-
         public static IEnumerable<IntPtr> EnumChildWindows(IntPtr parentHandle){
             var list = new List<IntPtr>();
             NativeMethods.EnumChildWindows(parentHandle, (wnd, param) => {
                 list.Add(wnd);
                 return true;
             }, IntPtr.Zero);
-            return list.ToArray();
-        }
-
-        public static IEnumerable<IntPtr> EnumTopLevelWindows() {
-            return EnumChildWindows(IntPtr.Zero);
+            return list;
         }
 
         public static WindowPlacement GetWindowPlacement(IntPtr windowHandle) {
@@ -57,31 +43,6 @@ namespace MemLib.Windows {
             if (NativeMethods.GetClassName(windowHandle, sb, sb.Capacity) == 0)
                 return string.Empty;
             return sb.ToString();
-        }
-
-        public static bool SendInput(params Input[] inputs) {
-            if (inputs == null || inputs.Length == 0)
-                return false;
-            if (!Environment.Is64BitProcess)
-                return NativeMethods.SendInput(inputs.Length, inputs, MarshalType<Input>.Size) != 0;
-            var inputs64 = new Input64[inputs.Length];
-            for (var i = 0; i < inputs.Length; i++) {
-                inputs64[i] = new Input64(inputs[i].Type);
-                switch (inputs[i].Type) {
-                    case InputTypes.Mouse:
-                        inputs64[i].Mouse = inputs[i].Mouse;
-                        break;
-                    case InputTypes.Keyboard:
-                        inputs64[i].Keyboard = inputs[i].Keyboard;
-                        break;
-                    case InputTypes.Hardware:
-                        inputs64[i].Hardware = inputs[i].Hardware;
-                        break;
-                    default:
-                        return false;
-                }
-            }
-            return NativeMethods.SendInput(inputs64.Length, inputs64, MarshalType<Input64>.Size) != 0;
         }
 
         public static bool SetForegroundWindow(IntPtr windowHandle) {

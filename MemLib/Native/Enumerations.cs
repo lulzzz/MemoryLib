@@ -148,32 +148,6 @@ namespace MemLib.Native {
     }
 
     [Flags]
-    public enum MouseFlags {
-        Absolute = 0x8000,
-        HWheel = 0x1000,
-        Move = 1,
-        MoveNoCoalesce = 0x2000,
-        LeftDown = 2,
-        LeftUp = 4,
-        RightDown = 8,
-        RightUp = 0x10,
-        MiddleDown = 0x20,
-        MiddleUp = 0x40,
-        VirtualDesk = 0x4000,
-        Wheel = 0x800,
-        XDown = 0x80,
-        XUp = 0x100
-    }
-
-    [Flags]
-    public enum KeyboardFlags {
-        ExtendedKey = 1,
-        KeyUp = 2,
-        ScanCode = 8,
-        Unicode = 4
-    }
-
-    [Flags]
     public enum Keys {
         A = 0x41,
         Add = 0x6b,
@@ -445,17 +419,6 @@ namespace MemLib.Native {
         ScanCodeToVirtualKey = 1,
         VirtualKeyToChar = 2,
         ScanCodeToVirtualKeyEx = 3
-    }
-
-    public enum InputTypes {
-        Mouse = 0,
-        Keyboard = 1,
-        Hardware = 2
-    }
-
-    public enum SystemMetrics {
-        CxScreen = 0,
-        CyScreen = 1
     }
 
     public enum WindowsMessages : uint {

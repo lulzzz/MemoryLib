@@ -83,12 +83,6 @@ namespace MemLib.Native {
 
         [DllImport("user32.dll")]
         public static extern IntPtr WindowFromPoint(Point pt);
-        
-        [DllImport("user32.dll")]
-        public static extern IntPtr ChildWindowFromPoint(IntPtr hWndParent, Point pt);
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr ChildWindowFromPointEx(IntPtr hWndParent, Point pt, uint flags);
 
         [DllImport("user32.dll")]
         public static extern IntPtr RealChildWindowFromPoint(IntPtr hWndParent, Point pt);
@@ -130,9 +124,6 @@ namespace MemLib.Native {
         [DllImport("user32.dll")]
         public static extern bool ShowWindow(IntPtr hWnd, WindowStates nCmdShow);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern int GetSystemMetrics(SystemMetrics metric);
-
 
         [DllImport("user32.dll")]
         public static extern uint MapVirtualKey(uint key, TranslationTypes translation);
@@ -141,19 +132,7 @@ namespace MemLib.Native {
         public static extern bool PostMessage(IntPtr hWnd, uint msg, UIntPtr wParam, UIntPtr lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern int SendInput(int nInputs, Input[] pInputs, int cbSize);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern int SendInput(int nInputs, Input64[] pInputs, int cbSize);
-
-        [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", SetLastError = false)]
-        public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetCursorPos(out Point lpPoint);
 
         #endregion
 

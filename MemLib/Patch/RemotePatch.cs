@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using MemLib.Memory;
 
 namespace MemLib.Patch {
     public sealed class RemotePatch : IDisposable, IEquatable<RemotePatch> {
@@ -12,12 +11,12 @@ namespace MemLib.Patch {
         public byte[] OldBytes { get; private set; }
 
         public int Size => NewBytes.Length;
-        public IntPtr PatchAddress { get; }
+        public IntPtr Address { get; }
         public string Name { get; }
 
         public bool IsApplied {
             get {
-                var remote = m_Process.Read<byte>(PatchAddress, Size);
+                var remote = m_Process.Read<byte>(Address, Size);
                 return remote.SequenceEqual(NewBytes);
             }
         }
@@ -26,16 +25,14 @@ namespace MemLib.Patch {
             m_Process = process;
             Name = name;
             NewBytes = newBytes;
-            PatchAddress = address;
+            Address = address;
             MustBeDisposed = mustDispose;
         }
 
         public void Apply() {
             if (IsApplied) return;
-            OldBytes = m_Process.Read<byte>(PatchAddress, NewBytes.Length);
-            using (new MemoryProtection(m_Process, PatchAddress, Size)) {
-                m_Process.Write(PatchAddress, NewBytes);
-            }
+            OldBytes = m_Process.Read<byte>(Address, NewBytes.Length);
+            m_Process.Write(Address, NewBytes);
         }
 
         public void Remove() {
@@ -44,17 +41,16 @@ namespace MemLib.Patch {
 
         internal void InternalRemove() {
             if (!IsApplied) return;
-            using (new MemoryProtection(m_Process, PatchAddress, Size)) {
-                m_Process.Write(PatchAddress, OldBytes);
-            }
+            m_Process.Write(Address, OldBytes);
         }
 
         public void ChangePatchBytes(byte[] newBytes) {
             if (IsApplied) {
-                using (new MemoryProtection(m_Process, PatchAddress, Size)) {
-                    m_Process.Write(PatchAddress, OldBytes);
-                    m_Process.Write(PatchAddress, newBytes);
-                }
+                m_Process.Write(Address, OldBytes);
+                OldBytes = m_Process.Read<byte>(Address, newBytes.Length);
+                m_Process.Write(Address, newBytes);
+            } else {
+                OldBytes = m_Process.Read<byte>(Address, newBytes.Length);
             }
             NewBytes = newBytes;
         }
@@ -63,9 +59,9 @@ namespace MemLib.Patch {
 
         public void Dispose() {
             if (IsDisposed) return;
+            IsDisposed = true;
             if (m_Process.IsRunning)
                 Remove();
-            IsDisposed = true;
             GC.SuppressFinalize(this);
         }
 
@@ -82,7 +78,7 @@ namespace MemLib.Patch {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return m_Process.Equals(other.m_Process) &&
-                   PatchAddress.Equals(other.PatchAddress) &&
+                   Address.Equals(other.Address) &&
                    string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -95,7 +91,7 @@ namespace MemLib.Patch {
         public override int GetHashCode() {
             unchecked {
                 var hashCode = m_Process.GetHashCode();
-                hashCode = (hashCode * 397) ^ PatchAddress.GetHashCode();
+                hashCode = (hashCode * 397) ^ Address.GetHashCode();
                 hashCode = (hashCode * 397) ^ Name.GetHashCode();
                 return hashCode;
             }
@@ -110,6 +106,5 @@ namespace MemLib.Patch {
         }
 
         #endregion
-        
     }
 }

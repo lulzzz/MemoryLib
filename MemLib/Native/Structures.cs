@@ -26,16 +26,11 @@ namespace MemLib.Native {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ClientId {
-        public readonly IntPtr ProcessId;
-        public readonly IntPtr ThreadId;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
     public struct ThreadBasicInformation {
         public readonly int ExitStatus;
         public readonly IntPtr TebBaseAdress;
-        public ClientId ClientId;
+        public readonly IntPtr ProcessId;
+        public readonly IntPtr ThreadId;
         public readonly IntPtr AffinityMask;
         public readonly int Priority;
         public readonly int BasePriority;
@@ -109,53 +104,5 @@ namespace MemLib.Native {
         public FlashWindowFlags Flags;
         public uint Count;
         public int Timeout;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Input {
-        public Input(InputTypes type) : this() {
-            Type = type;
-        }
-        [FieldOffset(0)] public InputTypes Type;
-        [FieldOffset(4)] public MouseInput Mouse;
-        [FieldOffset(4)] public KeyboardInput Keyboard;
-        [FieldOffset(4)] public HardwareInput Hardware;
-    }
-    
-    [StructLayout(LayoutKind.Explicit)]
-    public struct Input64 {
-        public Input64(InputTypes type) : this() {
-            Type = type;
-        }
-        [FieldOffset(0)] public InputTypes Type;
-        [FieldOffset(8)] public MouseInput Mouse;
-        [FieldOffset(8)] public KeyboardInput Keyboard;
-        [FieldOffset(8)] public HardwareInput Hardware;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct MouseInput {
-        public int DeltaX;
-        public int DeltaY;
-        public int MouseData;
-        public MouseFlags Flags;
-        public int Time;
-        public IntPtr ExtraInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct KeyboardInput {
-        public Keys VirtualKey;
-        public short ScanCode;
-        public KeyboardFlags Flags;
-        public int Time;
-        public IntPtr ExtraInfo;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct HardwareInput {
-        public int Message;
-        public short WParamL;
-        public short WParamH;
     }
 }

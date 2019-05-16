@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 using MemLib.Assembly;
@@ -6,7 +7,9 @@ using MemLib.Native;
 
 namespace MemLib.Memory {
     public class RemotePointer : IEquatable<RemotePointer> {
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         protected readonly RemoteProcess m_Process;
+
         public IntPtr BaseAddress { get; protected set; }
         public virtual bool IsValid => m_Process.IsRunning && BaseAddress != IntPtr.Zero;
 
@@ -183,6 +186,7 @@ namespace MemLib.Memory {
             return obj.GetType() == GetType() && Equals((RemotePointer) obj);
         }
 
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode() {
             return m_Process.GetHashCode() ^ BaseAddress.GetHashCode();
         }

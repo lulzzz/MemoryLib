@@ -3,7 +3,7 @@ using MemLib.Memory;
 
 namespace MemLib.PeHeader.Structures {
     public class ImageOptionalHeader : RemotePointer {
-        private readonly bool _is64Bit;
+        private readonly bool m_Is64Bit;
 
         public OptionalHeaderMagic Magic => (OptionalHeaderMagic)Read<ushort>(0x00);
         public byte MajorLinkerVersion => Read<byte>(0x02);
@@ -13,8 +13,8 @@ namespace MemLib.PeHeader.Structures {
         public uint SizeOfUninitializedData => Read<uint>(0x0C);
         public uint AddressOfEntryPoint => Read<uint>(0x10);
         public uint BaseOfCode => Read<uint>(0x14);
-        public uint BaseOfData => _is64Bit ? 0 : Read<uint>(0x18);
-        public ulong ImageBase => _is64Bit ? Read<ulong>(0x18) : Read<uint>(0x1C);
+        public uint BaseOfData => m_Is64Bit ? 0 : Read<uint>(0x18);
+        public ulong ImageBase => m_Is64Bit ? Read<ulong>(0x18) : Read<uint>(0x1C);
         public uint SectionAlignment => Read<uint>(0x20);
         public uint FileAlignment => Read<uint>(0x24);
         public ushort MajorOperatingSystemVersion => Read<ushort>(0x28);
@@ -29,18 +29,18 @@ namespace MemLib.PeHeader.Structures {
         public uint CheckSum => Read<uint>(0x40);
         public OptionalHeaderSubsystem Subsystem => (OptionalHeaderSubsystem)Read<ushort>(0x44);
         public OptionalHeaderDllCharacteristics DllCharacteristics => (OptionalHeaderDllCharacteristics)Read<ushort>(0x46);
-        public ulong SizeOfStackReserve => _is64Bit ? Read<ulong>(0x48) : Read<uint>(0x48);
-        public ulong SizeOfStackCommit => _is64Bit ? Read<ulong>(0x50) : Read<uint>(0x4C);
-        public ulong SizeOfHeapReserve => _is64Bit ? Read<ulong>(0x58) : Read<uint>(0x50);
-        public ulong SizeOfHeapCommit => _is64Bit ? Read<ulong>(0x60) : Read<uint>(0x54);
-        public uint LoaderFlags => _is64Bit ? Read<uint>(0x68) : Read<uint>(0x58);
-        public uint NumberOfRvaAndSizes => _is64Bit ? Read<uint>(0x6C) : Read<uint>(0x5C);
+        public ulong SizeOfStackReserve => m_Is64Bit ? Read<ulong>(0x48) : Read<uint>(0x48);
+        public ulong SizeOfStackCommit => m_Is64Bit ? Read<ulong>(0x50) : Read<uint>(0x4C);
+        public ulong SizeOfHeapReserve => m_Is64Bit ? Read<ulong>(0x58) : Read<uint>(0x50);
+        public ulong SizeOfHeapCommit => m_Is64Bit ? Read<ulong>(0x60) : Read<uint>(0x54);
+        public uint LoaderFlags => m_Is64Bit ? Read<uint>(0x68) : Read<uint>(0x58);
+        public uint NumberOfRvaAndSizes => m_Is64Bit ? Read<uint>(0x6C) : Read<uint>(0x5C);
 
         public readonly ImageDataDirectories DataDirectory;
 
         public ImageOptionalHeader(RemoteProcess proc, IntPtr address, bool is64Bit) : base(proc, address) {
-            _is64Bit = is64Bit;
-            DataDirectory = new ImageDataDirectories(proc, address + (_is64Bit ? 0x70 : 0x60));
+            m_Is64Bit = is64Bit;
+            DataDirectory = new ImageDataDirectories(proc, address + (m_Is64Bit ? 0x70 : 0x60));
         }
     }
 }

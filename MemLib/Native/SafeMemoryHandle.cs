@@ -13,7 +13,7 @@ namespace MemLib.Native {
 
         internal SafeMemoryHandle() : base(true) { }
 
-        internal SafeMemoryHandle(IntPtr handle) : base(true) {
+        private SafeMemoryHandle(IntPtr handle) : base(true) {
             SetHandle(handle);
         }
 
@@ -22,8 +22,8 @@ namespace MemLib.Native {
         }
 
         internal void InitialSetHandle(IntPtr h){
-            Debug.Assert(base.IsInvalid, "Safe handle should only be set once");
-            base.handle = h;
+            Debug.Assert(IsInvalid, "Safe handle should only be set once");
+            handle = h;
         }
         
         [DllImport("kernel32.dll", SetLastError = true)]

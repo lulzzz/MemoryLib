@@ -6,7 +6,7 @@ using MemLib.Native;
 namespace MemLib.Memory {
     public sealed class MemoryManager : IDisposable {
         private readonly RemoteProcess m_Process;
-        private readonly HashSet<RemoteAllocation> m_RemoteAllocations;
+        private readonly HashSet<RemoteAllocation> m_RemoteAllocations = new HashSet<RemoteAllocation>();
         private readonly IntPtr m_RegionLowerLimit;
         private readonly IntPtr m_RegionUpperLimit;
 
@@ -16,9 +16,9 @@ namespace MemLib.Memory {
         internal MemoryManager(RemoteProcess process) {
             m_Process = process;
             //TODO: Use better values for limits
-            m_RegionLowerLimit = process.Native.MainModule.BaseAddress;
+            if (process.Native.MainModule != null)
+                m_RegionLowerLimit = process.Native.MainModule.BaseAddress;
             m_RegionUpperLimit = process.Is64Bit ? new IntPtr(0x7fff_ffffffff) : new IntPtr(0x7fffffff);
-            m_RemoteAllocations = new HashSet<RemoteAllocation>();
         }
 
         private IEnumerable<RemoteRegion> QueryRegions(IntPtr start, IntPtr end) {
