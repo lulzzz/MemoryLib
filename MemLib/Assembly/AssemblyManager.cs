@@ -24,6 +24,10 @@ namespace MemLib.Assembly {
             return new AssemblyTransaction(m_Process, address, autoExecute);
         }
 
+        public AssemblyTransaction BeginTransaction(IntPtr address, int codeOffset, bool autoExecute = true) {
+            return new AssemblyTransaction(m_Process, address, codeOffset, autoExecute);
+        }
+
         public AssemblyTransaction BeginTransaction(bool autoExecute = true) {
             return new AssemblyTransaction(m_Process, autoExecute);
         }
@@ -137,21 +141,21 @@ namespace MemLib.Assembly {
 
         #region InjectAndExecute
 
-        public T InjectAndExecute<T>(string asm, IntPtr address) {
+        public T InjectAndExecute<T>(string asm, IntPtr address, int codeOffset = 0) {
             Inject(asm, address);
-            return Execute<T>(address);
+            return Execute<T>(address + codeOffset);
         }
         
-        public IntPtr InjectAndExecute(string asm, IntPtr address) {
-            return InjectAndExecute<IntPtr>(asm, address);
+        public IntPtr InjectAndExecute(string asm, IntPtr address, int codeOffset = 0) {
+            return InjectAndExecute<IntPtr>(asm, address, codeOffset);
         }
         
-        public T InjectAndExecute<T>(IEnumerable<string> asm, IntPtr address) {
-            return InjectAndExecute<T>(string.Join("\n", asm), address);
+        public T InjectAndExecute<T>(IEnumerable<string> asm, IntPtr address, int codeOffset = 0) {
+            return InjectAndExecute<T>(string.Join("\n", asm), address, codeOffset);
         }
         
-        public IntPtr InjectAndExecute(IEnumerable<string> asm, IntPtr address) {
-            return InjectAndExecute<IntPtr>(asm, address);
+        public IntPtr InjectAndExecute(IEnumerable<string> asm, IntPtr address, int codeOffset = 0) {
+            return InjectAndExecute<IntPtr>(asm, address, codeOffset);
         }
         
         public T InjectAndExecute<T>(string asm) {
@@ -176,41 +180,34 @@ namespace MemLib.Assembly {
 
         #region InjectAndExecuteAsync
 
-        public Task<T> InjectAndExecuteAsync<T>(string asm, IntPtr address) {
-            return Task.Run(() => InjectAndExecute<T>(asm, address));
+        public Task<T> InjectAndExecuteAsync<T>(string asm, IntPtr address, int codeOffset = 0) {
+            return Task.Run(() => InjectAndExecute<T>(asm, address, codeOffset));
         }
-
-
-        public Task<IntPtr> InjectAndExecuteAsync(string asm, IntPtr address) {
-            return InjectAndExecuteAsync<IntPtr>(asm, address);
+        
+        public Task<IntPtr> InjectAndExecuteAsync(string asm, IntPtr address, int codeOffset = 0) {
+            return InjectAndExecuteAsync<IntPtr>(asm, address, codeOffset);
         }
-
-
-        public Task<T> InjectAndExecuteAsync<T>(IEnumerable<string> asm, IntPtr address) {
-            return Task.Run(() => InjectAndExecute<T>(asm, address));
+        
+        public Task<T> InjectAndExecuteAsync<T>(IEnumerable<string> asm, IntPtr address, int codeOffset = 0) {
+            return Task.Run(() => InjectAndExecute<T>(asm, address, codeOffset));
         }
-
-
-        public Task<IntPtr> InjectAndExecuteAsync(IEnumerable<string> asm, IntPtr address) {
-            return InjectAndExecuteAsync<IntPtr>(asm, address);
+        
+        public Task<IntPtr> InjectAndExecuteAsync(IEnumerable<string> asm, IntPtr address, int codeOffset = 0) {
+            return InjectAndExecuteAsync<IntPtr>(asm, address, codeOffset);
         }
-
-
+        
         public Task<T> InjectAndExecuteAsync<T>(string asm) {
             return Task.Run(() => InjectAndExecute<T>(asm));
         }
-
-
+        
         public Task<IntPtr> InjectAndExecuteAsync(string asm) {
             return InjectAndExecuteAsync<IntPtr>(asm);
         }
-
-
+        
         public Task<T> InjectAndExecuteAsync<T>(IEnumerable<string> asm) {
             return Task.Run(() => InjectAndExecute<T>(asm));
         }
-
-
+        
         public Task<IntPtr> InjectAndExecuteAsync(IEnumerable<string> asm) {
             return InjectAndExecuteAsync<IntPtr>(asm);
         }
