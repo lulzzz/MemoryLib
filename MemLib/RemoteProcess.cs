@@ -19,7 +19,7 @@ namespace MemLib {
     public class RemoteProcess : IDisposable, IEquatable<RemoteProcess> {
         public Process Native { get; }
         public SafeMemoryHandle Handle { get; }
-        public IntPtr UnsafeHandle => Handle.DangerousGetHandle();
+        public IntPtr UnsafeHandle { get; }
         public string ProcessName => Native.ProcessName;
         public bool IsRunning => Native != null && !Native.HasExited && !Handle.IsClosed && !Handle.IsInvalid;
         public RemoteModule MainModule => Modules.MainModule;
@@ -58,6 +58,7 @@ namespace MemLib {
         public RemoteProcess(Process process) {
             Native = process ?? throw new ArgumentNullException(nameof(process));
             Handle = NativeMethods.OpenProcess(ProcessAccessFlags.AllAccess, false, process.Id);
+            UnsafeHandle = Handle.DangerousGetHandle();
         }
 
         #region Read Memory

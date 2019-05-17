@@ -8,24 +8,35 @@ namespace MemLib.PeHeader {
     public class PeHeaderParser : RemotePointer {
         public bool Is64Bit => Read<ushort>((int)DosHeader.e_lfanew + 0x04) == 0x8664;
         public bool IsPeFile => DosHeader.e_magic == 0x4D5A;
-        public ImageDosHeader DosHeader { get; }
-        public ImageNtHeader NtHeader { get; }
-        public ImageExportDirectory ExportDirectory { get; }
-        public ImageSectionHeaders SectionHeaders { get; }
         public IEnumerable<ExportFunction> ExportFunctions => ReadExports();
+        public ImageDosHeader DosHeader { get; }
+
+        private ImageNtHeader m_NtHeader;
+        public ImageNtHeader NtHeader => m_NtHeader ?? (m_NtHeader = new ImageNtHeader(m_Process, BaseAddress + (int) DosHeader.e_lfanew, Is64Bit));
+
+        private ImageExportDirectory m_ExportDirectory;
+        public ImageExportDirectory ExportDirectory {
+            get {
+                if (m_ExportDirectory != null) return m_ExportDirectory;
+                var exportVa = NtHeader.OptionalHeader.DataDirectory[0].VirtualAddress;
+                if (exportVa != 0)
+                    m_ExportDirectory = new ImageExportDirectory(m_Process, BaseAddress + (int) exportVa);
+                return m_ExportDirectory;
+            }
+        }
+
+        private ImageSectionHeaders m_SectionHeaders;
+        public ImageSectionHeaders SectionHeaders {
+            get {
+                if (m_SectionHeaders != null) return m_SectionHeaders;
+                var numSections = (int)NtHeader.FileHeader.NumberOfSections;
+                var secHeaderStart = DosHeader.e_lfanew + NtHeader.FileHeader.SizeOfOptionalHeader + 0x18;
+                return m_SectionHeaders = new ImageSectionHeaders(m_Process, BaseAddress + (int)secHeaderStart, numSections);
+            }
+        }
 
         public PeHeaderParser(RemoteProcess process, IntPtr moduleBase) : base(process, moduleBase) {
             DosHeader = new ImageDosHeader(process, moduleBase);
-            NtHeader = new ImageNtHeader(process, moduleBase + (int)DosHeader.e_lfanew, Is64Bit);
-
-            var numSections = (int)NtHeader.FileHeader.NumberOfSections;
-            var secHeaderStart = DosHeader.e_lfanew + NtHeader.FileHeader.SizeOfOptionalHeader + 0x18;
-            SectionHeaders = new ImageSectionHeaders(process, moduleBase + (int)secHeaderStart, numSections);
-
-            var exportDirVa = NtHeader.OptionalHeader.DataDirectory[0].VirtualAddress;
-            if (exportDirVa != 0) {
-                ExportDirectory = new ImageExportDirectory(process, moduleBase + (int)exportDirVa);
-            }
         }
         
         private IEnumerable<ExportFunction> ReadExports() {

@@ -25,6 +25,8 @@ namespace MemLib.Memory {
             return MemoryHelper.Query(m_Process.Handle, start, end).Select(region => new RemoteRegion(m_Process, region.BaseAddress));
         }
 
+        #region Allocate
+
         public RemoteAllocation Allocate(int size, bool mustBeDisposed = true) {
             return Allocate(size, MemoryProtectionFlags.ExecuteReadWrite, mustBeDisposed);
         }
@@ -35,12 +37,25 @@ namespace MemLib.Memory {
             return memory;
         }
 
+        #endregion
+
+        #region Deallocate
+
         public void Deallocate(RemoteAllocation allocation) {
             if (m_RemoteAllocations.Contains(allocation))
                 m_RemoteAllocations.Remove(allocation);
             if (!allocation.IsDisposed)
                 allocation.Dispose();
         }
+
+        public void Deallocate(IntPtr baseAddress) {
+            var alloc = m_RemoteAllocations.FirstOrDefault(a => a.BaseAddress == baseAddress);
+            if(alloc == null)
+                MemoryHelper.Free(m_Process.Handle, baseAddress);
+            else Deallocate(alloc); 
+        }
+
+        #endregion
 
         #region IDisposable
 

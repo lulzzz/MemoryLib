@@ -87,6 +87,7 @@
     <Compile Include="Memory\RemotePointer.cs" />
     <Compile Include="Memory\RemoteRegion.cs" />
     <Compile Include="Modules\InjectedModule.cs" />
+    <Compile Include="Modules\CachedModuleExport.cs" />
     <Compile Include="Modules\ModuleHelper.cs" />
     <Compile Include="Modules\ModuleManager.cs" />
     <Compile Include="Modules\NativeModule.cs" />

@@ -6,6 +6,8 @@ using MemLib.PeHeader;
 
 namespace MemLib.Modules {
     public class RemoteModule : RemoteRegion {
+        internal static readonly HashSet<CachedModuleExport> ExportCache = new HashSet<CachedModuleExport>();
+
         public NativeModule Native { get; }
         public PeHeaderParser PeHeader { get; }
         public string Name => Native.ModuleName;
@@ -13,6 +15,7 @@ namespace MemLib.Modules {
         public long Size => Native.ModuleMemorySize;
         public bool IsMainModule => m_Process.Native.MainModule != null && m_Process.Native.MainModule.BaseAddress == BaseAddress;
         public override bool IsValid => base.IsValid && m_Process.Modules.NativeModules.Any(m => m.BaseAddress == BaseAddress && m.ModuleName == Name);
+
         public IEnumerable<RemoteFunction> Exports => PeHeader.ExportFunctions.Select(f => new RemoteFunction(m_Process, BaseAddress + f.RelativeAddress, f.Name));
 
         public RemoteFunction this[string functionName] => FindFunction(functionName);
@@ -27,9 +30,18 @@ namespace MemLib.Modules {
             BaseAddress = IntPtr.Zero;
         }
 
-        private RemoteFunction FindFunction(string functionName) {
-            var function = Exports.FirstOrDefault(f => f.Name == functionName || f.UndecoratedName == functionName);
-            return function;
+        private RemoteFunction FindFunction(string name) {
+            var cache = new CachedModuleExport(m_Process.UnsafeHandle, BaseAddress, name);
+            if (ExportCache.TryGetValue(cache, out var cacheVal))
+                return cacheVal.Function;
+
+            var func = Exports.FirstOrDefault(f =>
+                f.Name.Equals(name, StringComparison.Ordinal) ||
+                f.UndecoratedName.Equals(name, StringComparison.Ordinal));
+            if (func == null) return null;
+            cache.Function = func;
+            ExportCache.Add(cache);
+            return func;
         }
         
         public override string ToString() => $"BaseAddress=0x{BaseAddress.ToInt64():X} Size=0x{Size:X} Name={Name}";

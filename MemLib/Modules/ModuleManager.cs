@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using MemLib.Native;
@@ -10,11 +9,11 @@ namespace MemLib.Modules {
         private readonly RemoteProcess m_Process;
         private readonly HashSet<InjectedModule> m_InjectedModules = new HashSet<InjectedModule>();
         internal IEnumerable<NativeModule> NativeModules => InternalEnumProcessModules();
-
+        
         private RemoteModule m_MainModule;
         public RemoteModule MainModule => m_MainModule ?? (m_MainModule = FetchModule(m_Process.Native.MainModule?.ModuleName));
         public IEnumerable<RemoteModule> RemoteModules => NativeModules.Select(m => new RemoteModule(m_Process, m));
-
+        
         public RemoteModule this[string moduleName] => FetchModule(moduleName);
 
         internal ModuleManager(RemoteProcess process) {
@@ -24,60 +23,77 @@ namespace MemLib.Modules {
         private RemoteModule FetchModule(string moduleName) {
             if (!Path.HasExtension(moduleName))
                 moduleName += ".dll";
-            var nativeMod = NativeModules.FirstOrDefault(m => m.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
-            return nativeMod == null ? null : new RemoteModule(m_Process, nativeMod);
+            var native = NativeModules.FirstOrDefault(m => m.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
+            return native == null ? null : new RemoteModule(m_Process, native);
         }
-        
-        [DebuggerStepThrough]
-        public InjectedModule Inject(string moduleFile, bool mustBeDisposed = true) {
-            var module = InternalInject(moduleFile, mustBeDisposed);
-            if (module != null && !m_InjectedModules.Contains(module)) 
-                m_InjectedModules.Add(module);
-            return module;
+
+        #region Inject
+
+        public InjectedModule Inject(string module, bool mustBeDisposed = true) {
+            if (!Path.HasExtension(module))
+                module += ".dll";
+            var mod = InternalInject(module, mustBeDisposed);
+            if (mod != null && !m_InjectedModules.Contains(mod))
+                m_InjectedModules.Add(mod);
+            return mod;
         }
+
+        #endregion
+
+        #region Eject
 
         public void Eject(RemoteModule module) {
             if (module == null || !module.IsValid) return;
-            
+
             var injected = m_InjectedModules.FirstOrDefault(m => m.Equals(module));
             if (injected != null)
                 m_InjectedModules.Remove(injected);
 
-            InternalEject(module);
+            InternalEject(module.BaseAddress);
         }
 
-        public void Eject(string moduleName) {
-            var module = RemoteModules.FirstOrDefault(m => m.Name.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
-            if (module != null)
-                InternalEject(module);
+        public void Eject(string module) {
+            if (!Path.HasExtension(module))
+                module += ".dll";
+            Eject(RemoteModules.FirstOrDefault(m => m.Name.Equals(module, StringComparison.OrdinalIgnoreCase) 
+                                                        || m.Path.Equals(module, StringComparison.OrdinalIgnoreCase)));
         }
+
+        public void Eject(IntPtr module) {
+            Eject(RemoteModules.FirstOrDefault(m => m.BaseAddress == module));
+        }
+
+        #endregion
+
+        #region Internals
 
         private IEnumerable<NativeModule> InternalEnumProcessModules() {
             var flags = m_Process.Is64Bit ? ListModulesFlags.ListModules64Bit : ListModulesFlags.ListModules32Bit;
             if (!ModuleHelper.EnumProcessModules(m_Process.Handle, out var modHandles, flags))
-                yield break;
-            foreach (var handle in modHandles)
-                yield return new NativeModule(m_Process.Handle, handle);
+                return Enumerable.Empty<NativeModule>();
+            return modHandles.Select(h => new NativeModule(m_Process.Handle, h));
         }
 
-        private InjectedModule InternalInject(string path, bool mustBeDisposed) {
-            var thread = m_Process.Threads.CreateAndJoin(m_Process["kernel32"]["LoadLibraryA"].BaseAddress, path);
+        private InjectedModule InternalInject(string module, bool mustBeDisposed) {
+            var thread = m_Process.Threads.CreateAndJoin(this["kernel32"]["LoadLibraryA"].BaseAddress, module);
             if (thread.GetExitCode<IntPtr>() == IntPtr.Zero) return null;
-            var moduleName = Path.GetFileName(path);
-            var nativeMod = m_Process.Modules.NativeModules.First(m => m.ModuleName.Equals(moduleName, StringComparison.OrdinalIgnoreCase));
-            return new InjectedModule(m_Process, nativeMod, mustBeDisposed);
+            var native = NativeModules.FirstOrDefault(m => m.ModuleName.Equals(Path.GetFileName(module), StringComparison.OrdinalIgnoreCase));
+            return native == null ? null : new InjectedModule(m_Process, native, mustBeDisposed);
         }
 
-        private void InternalEject(RemoteModule module) {
-            m_Process.Threads.CreateAndJoin(m_Process["kernel32"]["FreeLibrary"].BaseAddress, module.BaseAddress);
+        private void InternalEject(IntPtr hModule) {
+            m_Process.Threads.CreateAndJoin(this["kernel32"]["FreeLibrary"].BaseAddress, hModule);
         }
 
+        #endregion
+        
         #region IDisposable
 
         void IDisposable.Dispose() {
             foreach (var module in m_InjectedModules.Where(m => m.MustBeDisposed).ToList()) {
                 module.Dispose();
             }
+            RemoteModule.ExportCache.RemoveWhere(export => export.ProcessHandle == m_Process.UnsafeHandle);
             GC.SuppressFinalize(this);
         }
 
